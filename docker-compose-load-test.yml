@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  k6:
+    image: loadimpact/k6
+    volumes:
+      - ./LoadTests:/sources
+    environment:
+      K6_OUT: "${K6_OUT}"
+      BasicAuthToken: ${BasicAuthToken}
+      BackendForFrontendBaseUrl: ${BackendForFrontendBaseUrl}
+      LandingPageUrl: ${LandingPageUrl}
+      JsAsset1FileUrl: ${JsAsset1FileUrl}
+      JsAsset2FileUrl: ${JsAsset2FileUrl}
+  sitespeed.io:
+    image: sitespeedio/sitespeed.io
+    command: -V
+    shm_size: 1g
+    volumes:
+      - ./sitespeed-result/:/sitespeed.io/sitespeed-result
+networks:
+  default:
+    external:
+      name: local_development_network

@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  sitespeed.io:
+    image: sitespeedio/sitespeed.io
+    command: -V
+    shm_size: 1g
+    volumes:
+      - ./sitespeed-result/:/sitespeed.io/sitespeed-result
+
+  graphite:
+    image: sitespeedio/graphite:1.0.2-2-b
+    ports:
+      - "2003:2003"
+      - "8080:80"
+    volumes:
+      - whisper:/opt/graphite/storage/whisper
+    restart: always
+
+  influx:
+    image: influxdb:1.5.2dock
+    environment:
+      - INFLUXDB_DB=k6
+      
+  grafana:
+    image: load-testing/grafana
+    build:
+      context: ./Grafana
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influx
+      - graphite
+    links:
+        - graphite
+    volumes:
+      - grafana:/var/lib/grafana
+    restart: always
+
+  grafana-setup:
+    image: sitespeedio/grafana-bootstrap:7.5
+    links:
+      - grafana
+
+volumes:
+    grafana:
+    whisper:
+        
+networks:
+  default:
+    external:
+      name: local_development_network
